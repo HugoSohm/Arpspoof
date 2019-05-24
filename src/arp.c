@@ -56,7 +56,6 @@ int bind_arp(int ifindex, int *fd)
     if (*fd < 1)
         perror("socket()");
 
-    printf("Binding to ifindex %i", ifindex);
     struct sockaddr_ll sll;
     memset(&sll, 0, sizeof(struct sockaddr_ll));
     sll.sll_family = AF_PACKET;
@@ -87,11 +86,9 @@ int read_arp(int fd)
     if (ntohs(arp_resp->opcode) != ARP_REPLY)
         perror("Not an ARP reply");
 
-    printf("received ARP len = %ld", length);
     struct in_addr sender_a;
     memset(&sender_a, 0, sizeof(struct in_addr));
     memcpy(&sender_a.s_addr, arp_resp->src_ip, sizeof(uint32_t));
-    printf("Sender IP: %s", inet_ntoa(sender_a));
 
     printf("Sender MAC: %02X:%02X:%02X:%02X:%02X:%02X",
         arp_resp->src_mac[0],

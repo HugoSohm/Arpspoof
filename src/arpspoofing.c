@@ -7,12 +7,6 @@
 
 #include "arpspoofing.h"
 
-void checkfd(int fd)
-{
-    if (fd)
-        close(fd);
-}
-
 int arpspoofing(char **av)
 {
     arp_t *arp = init_arp(av);

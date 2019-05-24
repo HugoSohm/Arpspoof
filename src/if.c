@@ -7,6 +7,12 @@
 
 #include "arpspoofing.h"
 
+void checkfd(int fd)
+{
+    if (fd)
+        close(fd);
+}
+
 int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
 {
     int sd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
@@ -38,6 +44,5 @@ int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
     if (get_if_ip4(sd, ifname, ip)) {
         checkfd(sd);
     }
-    printf("get_if_info OK");
     return (0);
 }
