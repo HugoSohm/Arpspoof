@@ -7,9 +7,18 @@
 
 #include "arpspoofing.h"
 
+int send_spoof(int fd, arp_t *arp)
+{
+    printf("Spoofed packet sent to ‘%s’\n", arp->dest);
+    sleep(1);
+
+    return (0);
+}
+
 int arpspoofing(char **av)
 {
     arp_t *arp = init_arp(av);
+    arphdr_t *arph;
     uint32_t dst = inet_addr(arp->dest);
     char mac[MAC_LEN];
     int ifindex;
@@ -27,11 +36,11 @@ int arpspoofing(char **av)
     send_arp(fd, ifindex, mac, src, dst);
 
     while (42) {
-        if (read_arp(fd) == 0) {
-            printf("Got reply, break out");
+        if (read_arp(fd) == 0)
             break;
-        }
     }
+    while (42)
+        send_spoof(fd, arp);
     return (0);
 }
 
@@ -49,7 +58,7 @@ int main(int ac, char **av)
         help();
         return (84);
     } else {
-        return (arpspoofing(av));
+        arpspoofing(av);
     }
     return (0);
 }

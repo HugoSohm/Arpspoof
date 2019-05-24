@@ -34,6 +34,7 @@ typedef struct arp_s {
     const char *iface;
     const char *src;
     const char *dest;
+    unsigned char target_mac[6];
     int sock;
 } arp_t;
 

@@ -37,23 +37,19 @@ int format_ip4(struct sockaddr *addr, char *out)
 
 int get_if_ip4(int fd, const char *ifname, uint32_t *ip)
 {
-    int err = -1;
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(struct ifreq));
 
-    if (strlen(ifname) > (IFNAMSIZ - 1)) {
+    if (strlen(ifname) > (IFNAMSIZ - 1))
         perror("Too long interface name");
-        return (err);
-    }
+
     strcpy(ifr.ifr_name, ifname);
 
-    if (ioctl(fd, SIOCGIFADDR, &ifr) == -1) {
+    if (ioctl(fd, SIOCGIFADDR, &ifr) == -1)
         perror("SIOCGIFADDR");
-        return (err);
-    }
 
-    if (int_ip4(&ifr.ifr_addr, ip))
-        return (err);
-    err = 0;
+    int_ip4(&ifr.ifr_addr, ip);
+
+    return (0);
 }

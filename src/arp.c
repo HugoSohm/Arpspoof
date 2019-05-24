@@ -11,9 +11,11 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     uint32_t src_ip, uint32_t dst_ip)
 {
     unsigned char buffer[BUF_SIZE];
-    memset(buffer, 0, sizeof(buffer));
-
+    ssize_t ret = 0;
+    struct ethhdr *send_req = (struct ethhdr *)buffer;
+    arphdr_t *arp_req = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
     struct sockaddr_ll socket_address;
+
     socket_address.sll_family = AF_PACKET;
     socket_address.sll_protocol = htons(ETH_P_ARP);
     socket_address.sll_ifindex = ifindex;
@@ -23,40 +25,38 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     socket_address.sll_addr[6] = 0x00;
     socket_address.sll_addr[7] = 0x00;
 
-    struct ethhdr *send_req = (struct ethhdr *) buffer;
-    arphdr_t *arph = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
-    ssize_t ret = 0;
-
+    memset(buffer, 0, sizeof(buffer));
     memset(send_req->h_dest, 0xff, MAC_LEN);
-    memset(arph->dest_mac, 0x00, MAC_LEN);
+    memset(arp_req->dest_mac, 0xff, MAC_LEN);
     memcpy(send_req->h_source, src_mac, MAC_LEN);
-    memcpy(arph->src_mac, src_mac, MAC_LEN);
+    memcpy(arp_req->src_mac, src_mac, MAC_LEN);
     memcpy(socket_address.sll_addr, src_mac, MAC_LEN);
 
     send_req->h_proto = htons(ETH_P_ARP);
-    arph->hardware_type = htons(HW_TYPE);
-    arph->protocol_type = htons(ETH_P_IP);
-    arph->hardware_len = MAC_LEN;
-    arph->protocol_len = IPV4_LEN;
-    arph->opcode = htons(ARP_REQUEST);
-    memcpy(arph->src_ip, &src_ip, sizeof(uint32_t));
-    memcpy(arph->dest_ip, &dst_ip, sizeof(uint32_t));
+    arp_req->hardware_type = htons(HW_TYPE);
+    arp_req->protocol_type = htons(ETH_P_IP);
+    arp_req->hardware_len = MAC_LEN;
+    arp_req->protocol_len = IPV4_LEN;
+    arp_req->opcode = htons(ARP_REQUEST);
 
-    ret = sendto(fd, buffer, 42, 0, (struct sockaddr *)&socket_address,
-        sizeof(socket_address));
-    if (ret == -1) {
+    memcpy(arp_req->src_ip, &src_ip, sizeof(uint32_t));
+    memcpy(arp_req->dest_ip, &dst_ip, sizeof(uint32_t));
+
+    ret = sendto(fd, buffer, 42, 0, (struct sockaddr *) &socket_address, sizeof(socket_address));
+    if (ret == -1)
         perror("sendto():");
-    }
+
+    return (0);
 }
 
 int bind_arp(int ifindex, int *fd)
 {
-    *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
+    struct sockaddr_ll sll;
 
+    *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     if (*fd < 1)
         perror("socket()");
 
-    struct sockaddr_ll sll;
     memset(&sll, 0, sizeof(struct sockaddr_ll));
     sll.sll_family = AF_PACKET;
     sll.sll_ifindex = ifindex;
@@ -73,12 +73,13 @@ int read_arp(int fd)
 {
     unsigned char buffer[BUF_SIZE];
     ssize_t length = recvfrom(fd, buffer, BUF_SIZE, 0, NULL, NULL);
+    arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
+    struct ethhdr *rcv_resp = (struct ethhdr *)buffer;
+    struct in_addr sender_a;
+    arp_t *arp;
 
     if (length == -1)
         perror("recvfrom()");
-
-    struct ethhdr *rcv_resp = (struct ethhdr *) buffer;
-    arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
 
     if (ntohs(rcv_resp->h_proto) != PROTO_ARP)
         perror("Not an ARP packet");
@@ -86,15 +87,17 @@ int read_arp(int fd)
     if (ntohs(arp_resp->opcode) != ARP_REPLY)
         perror("Not an ARP reply");
 
-    struct in_addr sender_a;
     memset(&sender_a, 0, sizeof(struct in_addr));
     memcpy(&sender_a.s_addr, arp_resp->src_ip, sizeof(uint32_t));
+    memcpy(arp->target_mac, arp_resp->src_mac, MAC_LEN);
 
-    printf("Sender MAC: %02X:%02X:%02X:%02X:%02X:%02X",
-        arp_resp->src_mac[0],
-        arp_resp->src_mac[1],
-        arp_resp->src_mac[2],
-        arp_resp->src_mac[3],
-        arp_resp->src_mac[4],
-        arp_resp->src_mac[5]);
+    printf("Found victim's MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        arp->target_mac[0],
+        arp->target_mac[1],
+        arp->target_mac[2],
+        arp->target_mac[3],
+        arp->target_mac[4],
+        arp->target_mac[5]);
+
+    return (0);
 }

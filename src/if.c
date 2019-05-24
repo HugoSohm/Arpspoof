@@ -41,8 +41,8 @@ int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
     }
     memcpy(mac, ifr.ifr_hwaddr.sa_data, MAC_LEN);
 
-    if (get_if_ip4(sd, ifname, ip)) {
+    if (get_if_ip4(sd, ifname, ip))
         checkfd(sd);
-    }
+
     return (0);
 }
