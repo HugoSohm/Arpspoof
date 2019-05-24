@@ -9,9 +9,8 @@
 
 void checkfd(int fd)
 {
-    if (fd) {
+    if (fd)
         close(fd);
-    }
 }
 
 int arpspoofing(char **av)
@@ -20,7 +19,7 @@ int arpspoofing(char **av)
     uint32_t dst = inet_addr(arp->dest);
     char mac[MAC_LEN];
     int ifindex;
-    int arp_fd;
+    int fd;
     int read;
     int src;
 
@@ -28,22 +27,13 @@ int arpspoofing(char **av)
         printf("Invalid source IP\n");
         return (84);
     }
-    if (get_if_info(arp->iface, &src, mac, &ifindex)) {
-        perror("get_if_info failed");
-        checkfd(arp_fd);
-    }
-    if (bind_arp(ifindex, &arp_fd)) {
-        perror("Failed to bind_arp()");
-        checkfd(arp_fd);
-    }
-    if (send_arp(arp_fd, ifindex, mac, src, dst)) {
-        perror("Failed to send_arp");
-        checkfd(arp_fd);
-    }
 
-    while (1) {
-        read = read_arp(arp_fd);
-        if (read == 0) {
+    get_if_info(arp->iface, &src, mac, &ifindex);
+    bind_arp(ifindex, &fd);
+    send_arp(fd, ifindex, mac, src, dst);
+
+    while (42) {
+        if (read_arp(fd) == 0) {
             printf("Got reply, break out");
             break;
         }
@@ -61,7 +51,7 @@ void help(void)
 
 int main(int ac, char **av)
 {
-    if (ac != 3) {
+    if (ac != 4) {
         help();
         return (84);
     } else {

@@ -10,7 +10,6 @@
 int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     uint32_t src_ip, uint32_t dst_ip)
 {
-    int err = -1;
     unsigned char buffer[BUF_SIZE];
     memset(buffer, 0, sizeof(buffer));
 
@@ -40,8 +39,6 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     arph->hardware_len = MAC_LEN;
     arph->protocol_len = IPV4_LEN;
     arph->opcode = htons(ARP_REQUEST);
-
-    printf("Copy IP address to arph");
     memcpy(arph->src_ip, &src_ip, sizeof(uint32_t));
     memcpy(arph->dest_ip, &dst_ip, sizeof(uint32_t));
 
@@ -49,15 +46,12 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
         sizeof(socket_address));
     if (ret == -1) {
         perror("sendto():");
-        return (err);
     }
-    err = 0;
 }
 
 int bind_arp(int ifindex, int *fd)
 {
     *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
-    printf("bind_arp: ifindex = %i", ifindex);
 
     if (*fd < 1)
         perror("socket()");
@@ -78,27 +72,20 @@ int bind_arp(int ifindex, int *fd)
 
 int read_arp(int fd)
 {
-    int ret = -1;
     unsigned char buffer[BUF_SIZE];
     ssize_t length = recvfrom(fd, buffer, BUF_SIZE, 0, NULL, NULL);
 
-    printf("read_arp");
-
-    if (length == -1) {
+    if (length == -1)
         perror("recvfrom()");
-        return (ret);
-    }
+
     struct ethhdr *rcv_resp = (struct ethhdr *) buffer;
     arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
 
-    if (ntohs(rcv_resp->h_proto) != PROTO_ARP) {
-        printf("Not an ARP packet");
-        return (ret);
-    }
-    if (ntohs(arp_resp->opcode) != ARP_REPLY) {
-        printf("Not an ARP reply");
-        return (ret);
-    }
+    if (ntohs(rcv_resp->h_proto) != PROTO_ARP)
+        perror("Not an ARP packet");
+
+    if (ntohs(arp_resp->opcode) != ARP_REPLY)
+        perror("Not an ARP reply");
 
     printf("received ARP len = %ld", length);
     struct in_addr sender_a;
@@ -113,5 +100,4 @@ int read_arp(int fd)
         arp_resp->src_mac[3],
         arp_resp->src_mac[4],
         arp_resp->src_mac[5]);
-    ret = 0;
 }

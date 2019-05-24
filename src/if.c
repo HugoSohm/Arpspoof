@@ -12,8 +12,6 @@ int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
     int sd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     struct ifreq ifr;
 
-    printf("get_if_info for %s", ifname);
-
     if (sd <= 0) {
         perror("socket()");
         checkfd(sd);
@@ -30,7 +28,6 @@ int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
         checkfd(sd);
     }
     *ifindex = ifr.ifr_ifindex;
-    printf("interface index is %d\n", *ifindex);
 
     if (ioctl(sd, SIOCGIFHWADDR, &ifr) == -1) {
         perror("SIOCGIFINDEX");
