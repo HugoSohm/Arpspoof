@@ -7,7 +7,7 @@
 
 #include "arpspoofing.h"
 
-int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
+int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
 {
     int sd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     struct ifreq ifr;
@@ -35,7 +35,7 @@ int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex)
     }
     memcpy(mac, ifr.ifr_hwaddr.sa_data, MAC_LEN);
 
-    if (get_if_ip4(sd, ifname, ip))
+    if (ifr_ipv4_getter(sd, ifname, ip))
         checkfd(sd);
 
     return (0);

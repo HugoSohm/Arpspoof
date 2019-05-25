@@ -7,13 +7,65 @@
 
 #include "arpspoofing.h"
 
-int send_arp(int fd, int ifindex, const unsigned char *src_mac,
+int read_arp(int fd, arp_t *arp)
+{
+    unsigned char buffer[BUF_SIZE];
+    ssize_t length = recvfrom(fd, buffer, BUF_SIZE, 0, NULL, NULL);
+    arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_LEN);
+    struct ethhdr *rcv_resp = (struct ethhdr *)buffer;
+    struct in_addr sender_a;
+
+    if (length == -1)
+        error("Recvfrom failed");
+
+    if (ntohs(rcv_resp->h_proto) != PROTO_ARP)
+        error("Not an ARP packet");
+
+    if (ntohs(arp_resp->opcode) != ARP_REPLY)
+        error("Not an ARP reply");
+
+    memset(&sender_a, 0, sizeof(struct in_addr));
+    memcpy(&sender_a.s_addr, arp_resp->src_ip, sizeof(uint32_t));
+    memcpy(arp->target_mac, arp_resp->src_mac, MAC_LEN);
+
+    printf("Found victim's MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        arp->target_mac[0],
+        arp->target_mac[1],
+        arp->target_mac[2],
+        arp->target_mac[3],
+        arp->target_mac[4],
+        arp->target_mac[5]);
+
+    return (0);
+}
+
+int bind_arp(int ifindex, int *fd)
+{
+    struct sockaddr_ll sll;
+
+    *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
+    if (*fd < 1)
+        error("Socket failed");
+
+    memset(&sll, 0, sizeof(struct sockaddr_ll));
+    sll.sll_family = AF_PACKET;
+    sll.sll_ifindex = ifindex;
+
+    if (bind(*fd, (struct sockaddr *)&sll, sizeof(struct sockaddr_ll)) < 0) {
+        error("Bind failed");
+        if (*fd > 0)
+            close(*fd);
+    }
+    return (0);
+}
+
+int send_arp(int fd, int ifindex, char *src_mac,
     uint32_t src_ip, uint32_t dst_ip)
 {
     unsigned char buffer[BUF_SIZE];
     ssize_t ret = 0;
     struct ethhdr *send_req = (struct ethhdr *)buffer;
-    arphdr_t *arp_req = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
+    arphdr_t *arp_req = (arphdr_t *)(buffer + ETH2_LEN);
     struct sockaddr_ll socket_address;
 
     socket_address.sll_family = AF_PACKET;
@@ -45,58 +97,6 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     ret = sendto(fd, buffer, 42, 0, (struct sockaddr *) &socket_address, sizeof(socket_address));
     if (ret == -1)
         error("Sendto failed");
-
-    return (0);
-}
-
-int bind_arp(int ifindex, int *fd)
-{
-    struct sockaddr_ll sll;
-
-    *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
-    if (*fd < 1)
-        error("Socket failed");
-
-    memset(&sll, 0, sizeof(struct sockaddr_ll));
-    sll.sll_family = AF_PACKET;
-    sll.sll_ifindex = ifindex;
-
-    if (bind(*fd, (struct sockaddr *)&sll, sizeof(struct sockaddr_ll)) < 0) {
-        error("Bind failed");
-        if (*fd > 0)
-            close(*fd);
-    }
-    return (0);
-}
-
-int read_arp(int fd, arp_t *arp)
-{
-    unsigned char buffer[BUF_SIZE];
-    ssize_t length = recvfrom(fd, buffer, BUF_SIZE, 0, NULL, NULL);
-    arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
-    struct ethhdr *rcv_resp = (struct ethhdr *)buffer;
-    struct in_addr sender_a;
-
-    if (length == -1)
-        error("Recvfrom failed");
-
-    if (ntohs(rcv_resp->h_proto) != PROTO_ARP)
-        error("Not an ARP packet");
-
-    if (ntohs(arp_resp->opcode) != ARP_REPLY)
-        error("Not an ARP reply");
-
-    memset(&sender_a, 0, sizeof(struct in_addr));
-    memcpy(&sender_a.s_addr, arp_resp->src_ip, sizeof(uint32_t));
-    memcpy(arp->target_mac, arp_resp->src_mac, MAC_LEN);
-
-    printf("Found victim's MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        arp->target_mac[0],
-        arp->target_mac[1],
-        arp->target_mac[2],
-        arp->target_mac[3],
-        arp->target_mac[4],
-        arp->target_mac[5]);
 
     return (0);
 }

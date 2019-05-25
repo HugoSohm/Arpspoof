@@ -9,7 +9,7 @@ NAME		=	myARPspoof
 
 SRCS    	=	src/arp.c	\
 				src/init.c	\
-				src/if.c	\
+				src/ifr.c	\
 				src/ipv4.c	\
 				src/tools.c	\
 				src/arpspoofing.c
@@ -21,7 +21,7 @@ INCL		=	-Iinclude
 
 CC			=	gcc
 RM			=	rm -f
-CFLAGS		=	-W
+CFLAGS		=	-W -Wall -Werror
 
 #####################################################
 

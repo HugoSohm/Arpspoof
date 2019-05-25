@@ -7,17 +7,18 @@
 
 #include "arpspoofing.h"
 
-int int_ip4(struct sockaddr *addr, uint32_t *ip)
+int init_ipv4(struct sockaddr *addr, uint32_t *ip)
 {
     if (addr->sa_family == AF_INET) {
         struct sockaddr_in *i = (struct sockaddr_in *) addr;
         *ip = i->sin_addr.s_addr;
-        return (0);
     } else
         error("Not AF_INET");
+    
+    return (0);
 }
 
-int get_if_ip4(int fd, const char *ifname, uint32_t *ip)
+int ifr_ipv4_getter(int fd, const char *ifname, uint32_t *ip)
 {
     struct ifreq ifr;
 
@@ -31,7 +32,7 @@ int get_if_ip4(int fd, const char *ifname, uint32_t *ip)
     if (ioctl(fd, SIOCGIFADDR, &ifr) == -1)
         error("SIOCGIFADDR failed");
 
-    int_ip4(&ifr.ifr_addr, ip);
+    init_ipv4(&ifr.ifr_addr, ip);
 
     return (0);
 }

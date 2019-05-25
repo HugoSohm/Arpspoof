@@ -22,13 +22,13 @@
 
 #define ETH_TYPE    0x0800
 #define PROTO_ARP   0x0806
-#define ETH2_HEADER_LEN 14
-#define HW_TYPE     1
-#define MAC_LEN     6
-#define IPV4_LEN    4
 #define ARP_REQUEST 0x01
 #define ARP_REPLY   0x02
+#define IPV4_LEN    4
+#define ETH2_LEN    14
 #define BUF_SIZE    60
+#define HW_TYPE     1
+#define MAC_LEN     6
 
 typedef struct arp_s {
     const char *iface;
@@ -60,10 +60,10 @@ void checkfd(int fd);
 int error(char *str);
 
 // Get infos
-int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
+int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
 
 // Arp package
-int send_arp(int fd, int ifindex, const unsigned char *src_mac,
+int send_arp(int fd, int ifindex, char *src_mac,
     uint32_t src_ip, uint32_t dst_ip);
 int bind_arp(int ifindex, int *fd);
 int read_arp(int fd, arp_t *arp);
@@ -72,8 +72,7 @@ int read_arp(int fd, arp_t *arp);
 arp_t *init_arp(char **av);
 
 // Ipv4
-int int_ip4(struct sockaddr *addr, uint32_t *ip);
-int format_ip4(struct sockaddr *addr, char *out);
-int get_if_ip4(int fd, const char *ifname, uint32_t *ip);
+int init_ipv4(struct sockaddr *addr, uint32_t *ip);
+int ifr_ipv4_getter(int fd, const char *ifname, uint32_t *ip);
 
 #endif
