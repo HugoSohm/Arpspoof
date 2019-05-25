@@ -11,6 +11,7 @@ SRCS    	=	src/arp.c	\
 				src/init.c	\
 				src/if.c	\
 				src/ipv4.c	\
+				src/tools.c	\
 				src/arpspoofing.c
 
 OBJS		=	$(SRCS:.c=.o)
@@ -30,7 +31,7 @@ CFLAGS		=	-W
 
 all	:	$(OBJS)
 	@$(CC) $(OBJS) -o $(NAME)
-	@printf "\n \033[33m[Message]\033[39m Server compilation done\n"
+	@printf "\n \033[33m[Message]\033[39m ARPspoof compilation done\n"
 
 clean	:
 	@$(RM) *~ $(OBJS)

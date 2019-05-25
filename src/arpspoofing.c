@@ -9,7 +9,7 @@
 
 int send_spoof(int fd, arp_t *arp)
 {
-    printf("Spoofed packet sent to ‘%s’\n", arp->dest);
+    printf("Spoofed packet sent to '%s'\n", arp->dest);
     sleep(1);
 
     return (0);
@@ -26,21 +26,20 @@ int arpspoofing(char **av)
     int read;
     int src;
 
-    if (dst == 0 || dst == 0xffffffff) {
-        printf("Invalid source IP\n");
-        return (84);
-    }
+    if (dst == 0 || dst == 0xffffffff)
+        error("Invalid source IP");
 
     get_if_info(arp->iface, &src, mac, &ifindex);
     bind_arp(ifindex, &fd);
     send_arp(fd, ifindex, mac, src, dst);
 
     while (42) {
-        if (read_arp(fd) == 0)
+        if (read_arp(fd, arp) == 0)
             break;
     }
-    while (42)
+    while (42) {
         send_spoof(fd, arp);
+    }
     return (0);
 }
 

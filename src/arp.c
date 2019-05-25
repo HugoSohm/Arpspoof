@@ -44,7 +44,7 @@ int send_arp(int fd, int ifindex, const unsigned char *src_mac,
 
     ret = sendto(fd, buffer, 42, 0, (struct sockaddr *) &socket_address, sizeof(socket_address));
     if (ret == -1)
-        perror("sendto():");
+        error("Sendto failed");
 
     return (0);
 }
@@ -55,37 +55,36 @@ int bind_arp(int ifindex, int *fd)
 
     *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     if (*fd < 1)
-        perror("socket()");
+        error("Socket failed");
 
     memset(&sll, 0, sizeof(struct sockaddr_ll));
     sll.sll_family = AF_PACKET;
     sll.sll_ifindex = ifindex;
 
     if (bind(*fd, (struct sockaddr *)&sll, sizeof(struct sockaddr_ll)) < 0) {
-        perror("bind");
+        error("Bind failed");
         if (*fd > 0)
             close(*fd);
     }
     return (0);
 }
 
-int read_arp(int fd)
+int read_arp(int fd, arp_t *arp)
 {
     unsigned char buffer[BUF_SIZE];
     ssize_t length = recvfrom(fd, buffer, BUF_SIZE, 0, NULL, NULL);
     arphdr_t *arp_resp = (arphdr_t *)(buffer + ETH2_HEADER_LEN);
     struct ethhdr *rcv_resp = (struct ethhdr *)buffer;
     struct in_addr sender_a;
-    arp_t *arp;
 
     if (length == -1)
-        perror("recvfrom()");
+        error("Recvfrom failed");
 
     if (ntohs(rcv_resp->h_proto) != PROTO_ARP)
-        perror("Not an ARP packet");
+        error("Not an ARP packet");
 
     if (ntohs(arp_resp->opcode) != ARP_REPLY)
-        perror("Not an ARP reply");
+        error("Not an ARP reply");
 
     memset(&sender_a, 0, sizeof(struct in_addr));
     memcpy(&sender_a.s_addr, arp_resp->src_ip, sizeof(uint32_t));

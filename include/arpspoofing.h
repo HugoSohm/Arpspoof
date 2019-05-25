@@ -50,28 +50,28 @@ typedef struct arphdr_s {
     char        dest_ip[IPV4_LEN];
 } arphdr_t;
 
-// Main arpspoofing
+// Arpspoofing
 int arpspoofing(char **av);
 int main(int ac, char **av);
 void help(void);
 
-// Check
+// Functions
 void checkfd(int fd);
-void checkfd2(int *fd);
+int error(char *str);
 
-// If info
+// Get infos
 int get_if_info(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
 
 // Arp package
 int send_arp(int fd, int ifindex, const unsigned char *src_mac,
     uint32_t src_ip, uint32_t dst_ip);
 int bind_arp(int ifindex, int *fd);
-int read_arp(int fd);
+int read_arp(int fd, arp_t *arp);
 
 // Initalisation
 arp_t *init_arp(char **av);
 
-// IPV4
+// Ipv4
 int int_ip4(struct sockaddr *addr, uint32_t *ip);
 int format_ip4(struct sockaddr *addr, char *out);
 int get_if_ip4(int fd, const char *ifname, uint32_t *ip);
