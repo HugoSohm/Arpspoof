@@ -7,6 +7,14 @@
 
 #include "arpspoofing.h"
 
+void help(void)
+{
+    printf("USAGE:\n\n");
+    printf("\tsrc_ip\tis the source IP.\n");
+    printf("\tdest_ip\tis the destination IP.\n");
+    printf("\tiface\tis the interface to use to send/receive packets.\n");
+}
+
 int error(char *str)
 {
     perror(str);

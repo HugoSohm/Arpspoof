@@ -33,23 +33,15 @@ int arpspoofing(char **av)
     return (0);
 }
 
-void help(void)
-{
-    printf("USAGE:\n\n");
-    printf("\tsrc_ip\tis the source IP.\n");
-    printf("\tdest_ip\tis the destination IP.\n");
-    printf("\tiface\tis the interface to use to send/receive packets.\n");
-}
-
 int main(int ac, char **av)
 {
     if (ac == 4)
         arpspoofing(av);
     else if (ac == 5) {
         if (strcmp(av[4], "--printBroadcast") == 0)
-            printf("Broadcast\n");
+            printBroadcast(av);
         if (strcmp(av[4], "--printSpoof") == 0)
-            printf("Spoof\n");
+            printSpoof(av);
     } else {
         help();
         return (84);

@@ -51,13 +51,13 @@ typedef struct arphdr_s {
 } arphdr_t;
 
 // Arpspoofing
-int arpspoofing(char **av);
 int main(int ac, char **av);
-void help(void);
+int arpspoofing(char **av);
 
 // Functions
 void checkfd(int fd);
 int error(char *str);
+void help(void);
 
 // Get infos
 int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
@@ -65,6 +65,10 @@ int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
 // Spoof
 int send_spoof(arp_t *arp, int fd, int ifindex, char *src_mac,
     uint32_t src_ip, uint32_t dst_ip);
+
+// Flags
+int printBroadcast(char **av);
+int printSpoof(char **av);
 
 // Arp package
 int send_arp(int fd, int ifindex, char *src_mac,
@@ -76,7 +80,7 @@ int read_arp(int fd, arp_t *arp);
 arp_t *init_arp(char **av);
 
 // Ipv4
-int init_ipv4(struct sockaddr *addr, uint32_t *ip);
 int ifr_ipv4_getter(int fd, const char *ifname, uint32_t *ip);
+int init_ipv4(struct sockaddr *addr, uint32_t *ip);
 
 #endif

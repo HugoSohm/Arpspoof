@@ -13,6 +13,7 @@ SRCS    	=	src/arp.c	\
 				src/ipv4.c	\
 				src/tools.c	\
 				src/spoof.c	\
+				src/flags.c	\
 				src/arpspoofing.c
 
 OBJS		=	$(SRCS:.c=.o)
@@ -22,7 +23,7 @@ INCL		=	-Iinclude
 
 CC			=	gcc
 RM			=	rm -f
-CFLAGS		=	-W -Wall -Werror
+CFLAGS		=	-W
 
 #####################################################
 
