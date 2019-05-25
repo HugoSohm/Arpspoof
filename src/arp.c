@@ -42,8 +42,8 @@ int read_arp(int fd, arp_t *arp)
 int bind_arp(int ifindex, int *fd)
 {
     struct sockaddr_ll sll;
-
     *fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
+
     if (*fd < 1)
         error("Socket failed");
 

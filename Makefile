@@ -12,6 +12,7 @@ SRCS    	=	src/arp.c	\
 				src/ifr.c	\
 				src/ipv4.c	\
 				src/tools.c	\
+				src/spoof.c	\
 				src/arpspoofing.c
 
 OBJS		=	$(SRCS:.c=.o)

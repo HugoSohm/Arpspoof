@@ -62,6 +62,10 @@ int error(char *str);
 // Get infos
 int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
 
+// Spoof
+int send_spoof(arp_t *arp, int fd, int ifindex, char *src_mac,
+    uint32_t src_ip, uint32_t dst_ip);
+
 // Arp package
 int send_arp(int fd, int ifindex, char *src_mac,
     uint32_t src_ip, uint32_t dst_ip);
