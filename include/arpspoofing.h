@@ -31,10 +31,19 @@
 #define MAC_LEN     6
 
 typedef struct arp_s {
-    const char *iface;
-    const char *src;
-    const char *dest;
+    struct sockaddr_ll socket_address;
+    struct in_addr sender_a;
+    struct sockaddr_ll sll;
+    struct ifreq ifr;
+    unsigned char buffer[BUF_SIZE];
     unsigned char target_mac[6];
+    char mac[MAC_LEN];
+    const char *iface;
+    const char *dest;
+    uint32_t src;
+    uint32_t dst;
+    ssize_t ret;
+    int ifindex;
     int sock;
 } arp_t;
 
@@ -60,27 +69,25 @@ int error(char *str);
 void help(void);
 
 // Get infos
-int ifr_getter(const char *ifname, uint32_t *ip, char *mac, int *ifindex);
+int ifr_getter(arp_t *arp);
 
 // Spoof
-int send_spoof(arp_t *arp, int fd, int ifindex, char *src_mac,
-    uint32_t src_ip, uint32_t dst_ip);
+int send_spoof(arp_t *arp, int fd);
 
 // Flags
-int printBroadcast(char **av);
-int printSpoof(char **av);
+int print_broadcast(char **av);
+int print_spoof(char **av);
 
 // Arp package
-int send_arp(int fd, int ifindex, char *src_mac,
-    uint32_t src_ip, uint32_t dst_ip);
-int bind_arp(int ifindex, int *fd);
-int read_arp(int fd, arp_t *arp);
+int send_arp(arp_t *arp, int fd);
+int bind_arp(arp_t *arp, int *fd);
+int read_arp(arp_t *arp, int fd);
 
 // Initalisation
 arp_t *init_arp(char **av);
 
 // Ipv4
-int ifr_ipv4_getter(int fd, const char *ifname, uint32_t *ip);
-int init_ipv4(struct sockaddr *addr, uint32_t *ip);
+int ifr_ipv4_getter(arp_t *arp, int fd);
+int init_ipv4(arp_t *arp, struct sockaddr *addr);
 
 #endif

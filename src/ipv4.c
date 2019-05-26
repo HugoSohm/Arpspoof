@@ -7,32 +7,30 @@
 
 #include "arpspoofing.h"
 
-int init_ipv4(struct sockaddr *addr, uint32_t *ip)
+int init_ipv4(arp_t *arp, struct sockaddr *addr)
 {
     if (addr->sa_family == AF_INET) {
         struct sockaddr_in *i = (struct sockaddr_in *) addr;
-        *ip = i->sin_addr.s_addr;
+        arp->src = i->sin_addr.s_addr;
     } else
         error("Not AF_INET");
-    
+
     return (0);
 }
 
-int ifr_ipv4_getter(int fd, const char *ifname, uint32_t *ip)
+int ifr_ipv4_getter(arp_t *arp, int fd)
 {
-    struct ifreq ifr;
+    memset(&arp->ifr, 0, sizeof(struct ifreq));
 
-    memset(&ifr, 0, sizeof(struct ifreq));
-
-    if (strlen(ifname) > (IFNAMSIZ - 1))
+    if (strlen(arp->iface) > (IFNAMSIZ - 1))
         error("Too long interface name");
 
-    strcpy(ifr.ifr_name, ifname);
+    strcpy(arp->ifr.ifr_name, arp->iface);
 
-    if (ioctl(fd, SIOCGIFADDR, &ifr) == -1)
+    if (ioctl(fd, SIOCGIFADDR, &arp->ifr) == -1)
         error("SIOCGIFADDR failed");
 
-    init_ipv4(&ifr.ifr_addr, ip);
+    init_ipv4(arp, &arp->ifr.ifr_addr);
 
     return (0);
 }

