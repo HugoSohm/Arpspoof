@@ -45,6 +45,7 @@ typedef struct arp_s {
     ssize_t ret;
     int ifindex;
     int sock;
+    int fd;
 } arp_t;
 
 typedef struct arphdr_s {
@@ -72,22 +73,36 @@ void help(void);
 int ifr_getter(arp_t *arp);
 
 // Spoof
-int send_spoof(arp_t *arp, int fd);
+int set_header(arp_t *arp, struct ethhdr *send_req, arphdr_t *arp_req);
+int init_req(struct ethhdr *send_req, arphdr_t *arp_req);
+int init_arph(arp_t *arp);
+int send_spoof(arp_t *arp);
 
-// Flags
-int print_broadcast(char **av);
+// Print spoof
+int init_arph2(arp_t *arp);
+int set_header2(arp_t *arp, struct ethhdr *send_req,
+    arphdr_t *arp_req, char **av);
+int init_req2(struct ethhdr *send_req, arphdr_t *arp_req);
 int print_spoof(char **av);
 
+// Print broadcast
+int init_arph3(arp_t *arp);
+int set_header3(arp_t *arp, struct ethhdr *send_req, arphdr_t *arp_req);
+int init_req3(struct ethhdr *send_req, arphdr_t *arp_req);
+int print_broadcast(char **av);
+
 // Arp package
-int send_arp(arp_t *arp, int fd);
-int bind_arp(arp_t *arp, int *fd);
-int read_arp(arp_t *arp, int fd);
+int send_arp(arp_t *arp);
+int bind_arp(arp_t *arp);
+int read_arp(arp_t *arp);
 
 // Initalisation
 arp_t *init_arp(char **av);
+int init_arph(arp_t *arp);
+int init_req(struct ethhdr *send_req, arphdr_t *arp_req);
 
 // Ipv4
-int ifr_ipv4_getter(arp_t *arp, int fd);
+int ifr_ipv4_getter(arp_t *arp);
 int init_ipv4(arp_t *arp, struct sockaddr *addr);
 
 #endif

@@ -18,7 +18,7 @@ int init_ipv4(arp_t *arp, struct sockaddr *addr)
     return (0);
 }
 
-int ifr_ipv4_getter(arp_t *arp, int fd)
+int ifr_ipv4_getter(arp_t *arp)
 {
     memset(&arp->ifr, 0, sizeof(struct ifreq));
 
@@ -27,7 +27,7 @@ int ifr_ipv4_getter(arp_t *arp, int fd)
 
     strcpy(arp->ifr.ifr_name, arp->iface);
 
-    if (ioctl(fd, SIOCGIFADDR, &arp->ifr) == -1)
+    if (ioctl(arp->fd, SIOCGIFADDR, &arp->ifr) == -1)
         error("SIOCGIFADDR failed");
 
     init_ipv4(arp, &arp->ifr.ifr_addr);

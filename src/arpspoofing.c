@@ -10,21 +10,20 @@
 int arpspoofing(char **av)
 {
     arp_t *arp = init_arp(av);
-    int fd;
 
     if (arp->dst == 0 || arp->dst == 0xffffffff)
         error("Invalid source IP");
 
     ifr_getter(arp);
-    bind_arp(arp, &fd);
-    send_arp(arp, fd);
+    bind_arp(arp);
+    send_arp(arp);
 
     while (42) {
-        if (read_arp(arp, fd) == 0)
+        if (read_arp(arp) == 0)
             break;
     }
     while (42) {
-        send_spoof(arp, fd);
+        send_spoof(arp);
     }
     return (0);
 }
