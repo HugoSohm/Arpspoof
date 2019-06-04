@@ -44,8 +44,6 @@ int read_arp(arp_t *arp)
 
 int bind_arp(arp_t *arp)
 {
-    arp->fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
-
     if (arp->fd < 1)
         error("Socket failed");
 

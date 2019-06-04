@@ -60,7 +60,7 @@ int print_broadcast(char **av)
     struct ethhdr *send_req = (struct ethhdr *)arp->buffer;
     arphdr_t *arp_req = (arphdr_t *)(arp->buffer + ETH2_LEN);
 
-    ifr_getter(arp);
+    ifr_getter2(arp);
     init_arph3(arp);
     set_header3(arp, send_req, arp_req);
     init_req3(send_req, arp_req);

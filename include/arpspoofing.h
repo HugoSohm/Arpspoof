@@ -71,8 +71,9 @@ void help(void);
 
 // Get infos
 int ifr_getter(arp_t *arp);
+int ifr_getter2(arp_t *arp);
 
-// Spoof
+// Sending
 int set_header(arp_t *arp, struct ethhdr *send_req, arphdr_t *arp_req);
 int init_req(struct ethhdr *send_req, arphdr_t *arp_req);
 int init_arph(arp_t *arp);

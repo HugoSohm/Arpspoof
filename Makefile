@@ -7,13 +7,13 @@
 
 NAME		=	myARPspoof
 
-SRCS    	=	src/arp.c	\
-				src/init.c	\
-				src/ifr.c	\
-				src/ipv4.c	\
-				src/tools.c	\
-				src/spoof.c	\
-				src/print_spoof.c	\
+SRCS    	=	src/arp.c				\
+				src/init.c				\
+				src/ifr.c				\
+				src/ipv4.c				\
+				src/tools.c				\
+				src/sending.c			\
+				src/print_spoof.c		\
 				src/print_broadcast.c	\
 				src/arpspoofing.c
 

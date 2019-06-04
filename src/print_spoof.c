@@ -42,12 +42,21 @@ int init_req2(struct ethhdr *send_req, arphdr_t *arp_req)
 
 int loop_spoof(arp_t *arp)
 {
+    uint8_t bytes[6];
+    int values[6];
     int i = 0;
 
+    sscanf(arp->buffer, "%x:%x:%x:%x:%x:%x%*c",
+    &values[0], &values[1], &values[2],
+    &values[3], &values[4], &values[5]);
+
+    for (i = 0; i < 6; ++i)
+        bytes[i] = (uint8_t)values[i];
+
     while (i < 42) {
-        if ((arp->buffer[i] & 0xff) >= 0 && (arp->buffer[i] & 0xff) <= 8)
+        if ((bytes[i] & 0xff) >= 0 && (bytes[i] & 0xff) <= 8)
             printf("0");
-        printf("%x", arp->buffer[i] & 0xff);
+        printf("%x", bytes[i] & 0xff);
         if (i < 41)
             printf(" ");
         i++;
@@ -60,9 +69,8 @@ int print_spoof(char **av)
     arp_t *arp = init_arp(av);
     struct ethhdr *send_req = (struct ethhdr *)arp->buffer;
     arphdr_t *arp_req = (arphdr_t *)(arp->buffer + ETH2_LEN);
-    arp->fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
 
-    ifr_getter(arp);
+    ifr_getter2(arp);
     init_arph2(arp);
     set_header2(arp, send_req, arp_req, av);
     init_req2(send_req, arp_req);
@@ -70,11 +78,7 @@ int print_spoof(char **av)
     memcpy(arp_req->src_ip, &arp->src, sizeof(uint32_t));
     memcpy(arp_req->dest_ip, &arp->dst, sizeof(uint32_t));
 
-    arp->ret = sendto(arp->fd, arp->buffer, 42, 0,
-        (struct sockaddr *)&arp->socket_address, sizeof(arp->socket_address));
-    if (arp->ret == -1)
-        error("Sendto failed");
-
     loop_spoof(arp);
+
     return (0);
 }
