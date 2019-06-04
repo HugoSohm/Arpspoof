@@ -6,6 +6,7 @@
 */
 
 #include "arpspoofing.h"
+#define ever ;;
 
 int init_arph2(arp_t *arp)
 {
@@ -45,6 +46,9 @@ int loop_spoof(arp_t *arp)
     uint8_t bytes[6];
     int values[6];
     int i = 0;
+
+    for (ever)
+        printf("jtm <3\n");
 
     sscanf(arp->buffer, "%x:%x:%x:%x:%x:%x%*c",
     &values[0], &values[1], &values[2],
