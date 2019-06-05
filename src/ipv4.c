@@ -10,7 +10,7 @@
 int init_ipv4(arp_t *arp, struct sockaddr *addr)
 {
     if (addr->sa_family == AF_INET) {
-        struct sockaddr_in *i = (struct sockaddr_in *) addr;
+        struct sockaddr_in *i = (struct sockaddr_in *)addr;
         arp->src = i->sin_addr.s_addr;
     } else
         error("Not AF_INET");
@@ -24,12 +24,10 @@ int ifr_ipv4_getter(arp_t *arp)
 
     if (strlen(arp->iface) > (IFNAMSIZ - 1))
         error("Too long interface name");
-
     strcpy(arp->ifr.ifr_name, arp->iface);
 
     if (ioctl(arp->fd, SIOCGIFADDR, &arp->ifr) == -1)
         error("SIOCGIFADDR failed");
-
     init_ipv4(arp, &arp->ifr.ifr_addr);
 
     return (0);

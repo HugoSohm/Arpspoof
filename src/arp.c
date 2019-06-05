@@ -7,17 +7,6 @@
 
 #include "arpspoofing.h"
 
-int print_mac(arp_t *arp)
-{
-    printf("Found victim's MAC address: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        arp->target_mac[0],
-        arp->target_mac[1],
-        arp->target_mac[2],
-        arp->target_mac[3],
-        arp->target_mac[4],
-        arp->target_mac[5]);
-}
-
 int read_arp(arp_t *arp)
 {
     ssize_t length = recvfrom(arp->fd, arp->buffer, BUF_SIZE, 0, NULL, NULL);
@@ -67,7 +56,7 @@ int send_arp(arp_t *arp)
 
     init_arph(arp);
     set_header(arp, send_req, arp_req);
-    init_req(send_req, arp_req);
+    init_request(send_req, arp_req);
 
     memcpy(arp_req->src_ip, &arp->src, sizeof(uint32_t));
     memcpy(arp_req->dest_ip, &arp->dst, sizeof(uint32_t));

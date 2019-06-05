@@ -19,17 +19,7 @@ int init_arph(arp_t *arp)
     arp->socket_address.sll_addr[7] = 0x00;
 }
 
-int set_header(arp_t *arp, struct ethhdr *send_req, arphdr_t *arp_req)
-{
-    memset(arp->buffer, 0, sizeof(arp->buffer));
-    memset(send_req->h_dest, 0xff, MAC_LEN);
-    memset(arp_req->dest_mac, 0x00, MAC_LEN);
-    memcpy(send_req->h_source, arp->mac, MAC_LEN);
-    memcpy(arp_req->src_mac, arp->mac, MAC_LEN);
-    memcpy(arp->socket_address.sll_addr, arp->mac, MAC_LEN);
-}
-
-int init_req(struct ethhdr *send_req, arphdr_t *arp_req)
+int init_request(struct ethhdr *send_req, arphdr_t *arp_req)
 {
     send_req->h_proto = htons(ETH_P_ARP);
     arp_req->hardware_type = htons(HW_TYPE);
@@ -37,6 +27,16 @@ int init_req(struct ethhdr *send_req, arphdr_t *arp_req)
     arp_req->hardware_len = MAC_LEN;
     arp_req->protocol_len = IPV4_LEN;
     arp_req->opcode = htons(ARP_REQUEST);
+}
+
+int init_reply(struct ethhdr *send_req, arphdr_t *arp_req)
+{
+    send_req->h_proto = htons(ETH_P_ARP);
+    arp_req->hardware_type = htons(HW_TYPE);
+    arp_req->protocol_type = htons(ETH_P_IP);
+    arp_req->hardware_len = MAC_LEN;
+    arp_req->protocol_len = IPV4_LEN;
+    arp_req->opcode = htons(ARP_REPLY);
 }
 
 arp_t *init_arp(char **av)
