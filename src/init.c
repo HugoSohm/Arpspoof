@@ -45,6 +45,7 @@ arp_t *init_arp(char **av)
 
     arp->sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     arp->dest = av[2];
+    arp->src = inet_addr(av[1]);
     arp->dst = inet_addr(av[2]);
     arp->iface = av[3];
 

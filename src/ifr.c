@@ -26,8 +26,6 @@ int ifr_getter2(arp_t *arp)
         error("SIOCGIFINDEX failed again");
     memcpy(arp->mac, arp->ifr.ifr_hwaddr.sa_data, MAC_LEN);
 
-    if (ifr_ipv4_getter(arp))
-        checkfd(arp->fd);
     return (0);
 }
 

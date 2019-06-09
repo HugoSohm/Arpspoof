@@ -32,14 +32,14 @@
 
 typedef struct arp_s {
     struct sockaddr_ll socket_address;
-    struct in_addr sender_a;
-    struct sockaddr_ll sll;
-    struct ifreq ifr;
     unsigned char buffer[BUF_SIZE];
     unsigned char target_mac[6];
+    struct in_addr sender_a;
+    struct sockaddr_ll sll;
     char mac[MAC_LEN];
     const char *iface;
     const char *dest;
+    struct ifreq ifr;
     uint8_t bytes[6];
     uint32_t src;
     uint32_t dst;
