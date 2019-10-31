@@ -1,0 +1,11 @@
+language: c
+group: stable
+os: linux
+before_install:
+  - sudo apt-get update
+
+script:
+  - make
+
+notifications:
+  email: false
